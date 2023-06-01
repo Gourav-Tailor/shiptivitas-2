@@ -126,10 +126,16 @@ app.put('/api/v1/clients/:id', (req, res) => {
   const client = clients.find(client => client.id === id);
 
   /* ---------- Update code below ----------*/
+  const updatePriorities = db.prepare('UPDATE clients SET priority = priority+1 WHERE status = ? AND priority >= ?');
+  updatePriorities.run(status,priority);
 
+  const updateStatus = db.prepare('UPDATE clients SET status = ?,priority = ? WHERE id = ?');
+  updateStatus.run(status,priority,id);
 
+  const updateStmt = db.prepare('UPDATE clients SET priority = priority-1 WHERE status = ? AND priority >= ?');
+  updateStmt.run(client.status,client.priority);
 
-  return res.status(200).send(clients);
+  return res.status(200).send(updateStmt.run(client.status,client.priority));
 });
 
 app.listen(3001);
